@@ -1,4 +1,4 @@
-module github.com/NaddiNadja/peer-to-peer
+module github.com/jskoven/mandatory_handin_4_dissys
 
 go 1.17
 

@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PingClient interface {
 	Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Reply, error)
+	GiveToken(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type pingClient struct {
@@ -38,11 +39,21 @@ func (c *pingClient) Ping(ctx context.Context, in *Request, opts ...grpc.CallOpt
 	return out, nil
 }
 
+func (c *pingClient) GiveToken(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/ping.Ping/giveToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PingServer is the server API for Ping service.
 // All implementations must embed UnimplementedPingServer
 // for forward compatibility
 type PingServer interface {
 	Ping(context.Context, *Request) (*Reply, error)
+	GiveToken(context.Context, *Empty) (*Empty, error)
 	mustEmbedUnimplementedPingServer()
 }
 
@@ -52,6 +63,9 @@ type UnimplementedPingServer struct {
 
 func (UnimplementedPingServer) Ping(context.Context, *Request) (*Reply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
+}
+func (UnimplementedPingServer) GiveToken(context.Context, *Empty) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GiveToken not implemented")
 }
 func (UnimplementedPingServer) mustEmbedUnimplementedPingServer() {}
 
@@ -84,6 +98,24 @@ func _Ping_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Ping_GiveToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PingServer).GiveToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ping.Ping/giveToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PingServer).GiveToken(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Ping_ServiceDesc is the grpc.ServiceDesc for Ping service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -94,6 +126,10 @@ var Ping_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ping",
 			Handler:    _Ping_Ping_Handler,
+		},
+		{
+			MethodName: "giveToken",
+			Handler:    _Ping_GiveToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

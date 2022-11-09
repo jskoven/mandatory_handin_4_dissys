@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package ping;
+option go_package = "https://github.com/NaddiNadja/peer-to-peer;ping";
+
+
+service Ping {
+    rpc ping (Request) returns (Reply) {}
+    rpc giveToken (Empty) returns (Empty){}
+}
+
+message Request {
+    int32 id = 1;
+}
+
+message Reply {
+    int32 amount = 1;
+}
+
+message Boolean{
+    bool answer = 1;
+}
+
+message Empty{
+
+}
